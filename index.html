@@ -151,7 +151,7 @@
       <div class="section-head">
         <div class="section-kicker">About the app</div>
         <h2>Built for Campus Life</h2>
-        <p>A simple place for campus and NU notices with in-app PDFs, study tools, and everyday student needs — in one app.</p>
+        <p>A simple place for campus and NU notices with in-app PDFs, study tools, and everyday student needs in one app.</p>
       </div>
       <div class="feature-grid">
         <article class="feature">
@@ -238,6 +238,37 @@
       const note = document.getElementById("storeNote");
       if (note) note.textContent = "";
     }
+  <script>
+    // Keep the scroll position after a refresh (same tab).
+    // The browser alone can jump to the top on mobile while fonts/layout settle,
+    // so the position is saved in sessionStorage and restored after load.
+    try {
+      if ("scrollRestoration" in history) history.scrollRestoration = "auto";
+    } catch (e) {}
+    function saveScroll() {
+      try { sessionStorage.setItem("cmbd-scroll", String(window.scrollY)); } catch (e) {}
+    }
+    function restoreScroll() {
+      let y = null;
+      try { y = parseInt(sessionStorage.getItem("cmbd-scroll"), 10); } catch (e) {}
+      if (y && !isNaN(y) && y > 0) {
+        document.documentElement.style.scrollBehavior = "auto";
+        window.scrollTo(0, y);
+        requestAnimationFrame(function () {
+          document.documentElement.style.scrollBehavior = "";
+        });
+      }
+    }
+    let scrollTicking = false;
+    window.addEventListener("scroll", function () {
+      if (!scrollTicking) {
+        requestAnimationFrame(function () { saveScroll(); scrollTicking = false; });
+        scrollTicking = true;
+      }
+    }, { passive: true });
+    window.addEventListener("pagehide", saveScroll);
+    window.addEventListener("load", function () { setTimeout(restoreScroll, 50); });
+    restoreScroll();
   </script>
 </body>
 </html>
