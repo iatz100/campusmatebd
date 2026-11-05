@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CampusMate BD - Campus Life, Made Beautiful. | Android App</title>
+  <meta name="description" content="Download CampusMate BD for Android - NU notices with in-app PDFs, library, notes, GPA/CGPA calculator, book market and budget in one free student app.">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1">
+  <meta name="author" content="CampusMate BD">
+  <meta name="theme-color" content="#1e7a4b">
+  <link rel="canonical" href="https://campusmatebd.vercel.app/">
+  <link rel="alternate" hreflang="en" href="https://campusmatebd.vercel.app/">
+  <link rel="alternate" hreflang="x-default" href="https://campusmatebd.vercel.app/">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="logo.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="CampusMate BD">
+  <meta name="application-name" content="CampusMate BD">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="CampusMate BD">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:url" content="https://campusmatebd.vercel.app/">
+  <meta property="og:title" content="CampusMate BD - Campus Life, Made Beautiful.">
+  <meta property="og:description" content="All-in-one student app for campus notices, NU notices, library, notes, CGPA, budget, book market, document scanning and study planner.">
+  <meta property="og:image" content="https://campusmatebd.vercel.app/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="CampusMate BD logo">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="CampusMate BD - Campus Life, Made Beautiful.">
+  <meta name="twitter:description" content="All-in-one student app for campus notices, NU notices, library, notes, CGPA, budget, book market, document scanning and study planner.">
+  <meta name="twitter:image" content="https://campusmatebd.vercel.app/og-image.png">
+  <meta name="twitter:image:alt" content="CampusMate BD logo">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://campusmatebd.vercel.app/#website",
+        "url": "https://campusmatebd.vercel.app/",
+        "name": "CampusMate BD",
+        "description": "Download CampusMate BD for Android - NU notices with in-app PDFs, library, notes, GPA/CGPA calculator, book market and budget in one free student app.",
+        "inLanguage": "en",
+        "publisher": { "@id": "https://campusmatebd.vercel.app/#organization" }
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://campusmatebd.vercel.app/#organization",
+        "name": "CampusMate BD",
+        "url": "https://campusmatebd.vercel.app/",
+        "logo": { "@type": "ImageObject", "url": "https://campusmatebd.vercel.app/logo.png", "width": 512, "height": 512 }
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "CampusMate BD",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Android",
+        "url": "https://campusmatebd.vercel.app/",
+        "image": "https://campusmatebd.vercel.app/og-image.png",
+        "description": "All-in-one student app for campus notices, NU notices, library, notes, CGPA, budget, book market, document scanning and study planner.",
+        "inLanguage": "en",
+        "author": { "@id": "https://campusmatebd.vercel.app/#organization" },
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    ]
+  }
+  </script>
+  <link rel="preload" as="image" href="logo.png">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green:#1e7a4b; --green-dark:#0f2a1e; --green2:#2fa86b; --ink:#142947;
+      --muted:#637794; --line:#dce8f8; --pale:#e8f5ee; --white:#fff;
+      --shadow:0 14px 36px rgba(16,70,145,.08);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;color:var(--ink);background:#fff;font-family:Inter,"Hind Siliguri",sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}
+    .wrap{width:min(1120px,calc(100% - 40px));margin-inline:auto}
+    .topbar{height:76px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e8eff8;background:rgba(255,255,255,.94)}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:20px;letter-spacing:-.7px;color:var(--green-dark)}
+    .brand-mark{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;color:#fff;background:#fff;box-shadow:none;font-size:19px;overflow:hidden;border:1px solid #d7e8ff}
+    .brand-mark img,.phone-icon img,.download-badge img{width:100%;height:100%;object-fit:cover;display:block}
+    .brand span em{font-style:normal;color:var(--green)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid transparent;border-radius:999px;background:linear-gradient(115deg,#2fa86b,#1e7a4b);color:white;padding:13px 24px;font:700 14px Inter,sans-serif;box-shadow:0 8px 18px #1e7a4b26;transition:transform .2s,box-shadow .2s,filter .2s;cursor:pointer}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 12px 23px #1e7a4b38;filter:saturate(1.1)}
+    .btn-outline{background:#fff;color:var(--green-dark);border-color:#1e7a4b;box-shadow:none}
+    .btn-outline:hover{box-shadow:0 12px 23px #1e7a4b22}
+    .btn.disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
+    .btn-small{padding:10px 17px;font-size:12px}
+    .hero{position:relative;overflow:hidden;background:radial-gradient(ellipse at 82% 42%,#e2f5e9 0,transparent 32%),linear-gradient(120deg,#f8fbff 0%,#fff 52%,#f5f9ff 100%);border-bottom:1px solid #e7f0fc}
+    .hero-inner{min-height:460px;display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:30px;padding-top:40px;padding-bottom:42px}
+    .hero-copy{position:relative;z-index:1}
+    h1{margin:0 0 8px;color:#102e60;font-size:clamp(38px,5vw,59px);line-height:1.08;letter-spacing:-2.6px;font-weight:800}
+    h1 span{color:var(--green)}
+    .tagline{margin:0 0 14px;color:#6b7f9d;font-size:17px;font-weight:600}
+    .bangla-line{display:inline-block;padding:8px 13px;margin:0 0 14px;border:1px solid #d7e8ff;border-radius:9px;background:#edf5ff;color:#1558b5;font-family:"Hind Siliguri",sans-serif;font-size:16px;font-weight:600;animation:float 3.6s ease-in-out infinite}
+    .intro{max-width:500px;margin:0;color:#5b6e89;font-size:15px}
+    .hero-actions{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:23px;width:100%}
+    .store-note{width:100%;text-align:center;color:#8796aa;font-size:12px;margin:4px 0 0}
+    .store-group{display:flex;flex-direction:column;align-items:center;gap:6px}
+    .store-label{font-size:12px;font-weight:700;color:#466080;letter-spacing:.5px;text-transform:uppercase}
+    .app-preview{min-height:340px;display:grid;place-items:center;position:relative}
+    .halo{position:absolute;width:min(330px,90%);aspect-ratio:1;border-radius:50%;background:linear-gradient(145deg,#d8f0e2,#f4f8ff);border:1px solid #dceaff;animation:breathe 5s ease-in-out infinite}
+    .phone{position:relative;width:205px;height:340px;padding:8px;border-radius:32px;background:linear-gradient(145deg,#1b2a40,#050e1d);box-shadow:0 26px 50px #153d7628, inset 0 0 0 1px #8799b2;transform:rotate(2deg);animation:rise 5s ease-in-out infinite}
+    .phone-screen{height:100%;border-radius:25px;overflow:hidden;background:linear-gradient(160deg,#0f2a1e,#1e7a4b);position:relative;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;padding:22px 14px}
+    .phone-screen:after{content:"";position:absolute;bottom:-52px;left:-30px;width:270px;height:135px;border-radius:50%;background:linear-gradient(135deg,#2fa86b,#0f2a1e);transform:rotate(-15deg)}
+    .notch{position:absolute;z-index:2;top:8px;left:50%;transform:translateX(-50%);width:76px;height:17px;background:#050e1d;border-radius:0 0 12px 12px}
+    .phone-content{position:relative;z-index:1}
+    .phone-icon{width:72px;height:72px;display:grid;place-items:center;margin:0 auto 13px;border:1px solid #ffffff45;border-radius:22px;background:#ffffff1a;font-size:31px;overflow:hidden}
+    .phone-title{font-size:16px;font-weight:800;line-height:1.25}
+    .phone-sub{font-size:9px;color:#d4e6ff;margin-top:7px}
+    .float-chip{position:absolute;z-index:3;padding:10px 13px;border:1px solid #d9e8fb;border-radius:12px;background:#fff;box-shadow:var(--shadow);font-size:12px;color:#466080;animation:float 4s ease-in-out infinite}
+    .float-chip i{color:var(--green);margin-right:6px}
+    .chip-one{top:45px;right:0}.chip-two{bottom:45px;left:0;animation-delay:-1.7s}
+    .section{padding:72px 0}
+    .section-head{text-align:center;max-width:660px;margin:0 auto 34px}
+    .section-kicker{color:var(--green);font-size:12px;font-weight:800;letter-spacing:1.7px;text-transform:uppercase}
+    h2{margin:8px 0 10px;color:#102e60;font-size:clamp(26px,4vw,36px);line-height:1.2;letter-spacing:-1.1px}
+    .section-head p{margin:0;color:var(--muted);font-size:14px}
+    .feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+    .feature{display:flex;align-items:flex-start;gap:17px;padding:24px;border:1px solid var(--line);border-radius:15px;background:#fff;box-shadow:0 5px 18px #0e4d9910;transition:transform .22s,border-color .22s,box-shadow .22s}
+    .feature:hover{transform:translateY(-4px);border-color:#a9ceff;box-shadow:var(--shadow)}
+    .feature-icon{flex:0 0 48px;width:48px;height:48px;display:grid;place-items:center;border:1px solid #d9eaff;border-radius:14px;background:#edf5ff;color:var(--green);font-size:18px}
+    .feature-icon svg{width:22px;height:22px}
+    .float-chip svg{width:14px;height:14px;vertical-align:-2px;margin-right:6px}
+    .feature h3{margin:1px 0 5px;font-size:15px;color:#153765}
+    .feature p{margin:0;color:var(--muted);font-size:13px}
+    .download-panel{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:36px 42px;border:1px solid #cfe2fc;border-radius:20px;background:linear-gradient(115deg,#f2f8ff,#e8f2ff);box-shadow:var(--shadow)}
+    .download-panel:after{content:"";position:absolute;width:240px;height:240px;right:-60px;top:-120px;border:1px solid #cfe2fc;border-radius:50%;box-shadow:0 0 0 25px #d8e9ff55,0 0 0 52px #d8e9ff35}
+    .panel-copy{position:relative;z-index:1}
+    .panel-copy h2{margin:7px 0 8px}
+    .panel-copy p{margin:0 0 19px;color:var(--muted);font-size:14px}
+    .panel-actions{position:relative;z-index:1;display:flex;gap:12px;flex-wrap:wrap}
+    .download-badge{position:relative;z-index:1;flex:0 0 100px;width:100px;height:100px;display:grid;place-items:center;border:1px solid #cbdfff;border-radius:25px;background:#ffffffa8;color:var(--green);font-size:39px;transform:rotate(5deg);overflow:hidden}
+    .disclaimer{text-align:center;color:#8796aa;font-size:12px;max-width:660px;margin:28px auto 0}
+    .footer{margin-top:70px;padding:36px 0 22px;border-top:1px solid #e4edf8;background:#f8fbff;text-align:center}
+    .developer-icon{width:43px;height:43px;margin:0 auto 9px;display:grid;place-items:center;border:1px solid #d5e7ff;border-radius:13px;background:#edf5ff;color:var(--green);font-size:17px}
+    .developer-label{margin:0 0 13px;font-size:15px;font-weight:800;color:#173966}
+    .contact-btn{min-width:150px;padding:11px 22px}
+    .copyright{margin:0;padding:0;border-top:none;color:#8796aa;font-size:11px}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+    @keyframes breathe{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.04);opacity:1}}
+    @keyframes rise{0%,100%{transform:translateY(0) rotate(2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
+    @media(max-width:760px){
+      .wrap{width:min(100% - 30px,600px)}.topbar{height:68px}.brand{font-size:17px}.brand-mark{width:38px;height:38px}
+      .hero-inner{grid-template-columns:1fr;gap:8px;padding-top:48px;text-align:center}.hero-copy{display:flex;flex-direction:column;align-items:center}
+      h1{font-size:clamp(38px,10vw,52px);letter-spacing:-1.8px}.intro{max-width:520px}.hero-actions{justify-content:center}
+      .app-preview{min-height:330px;margin-top:4px}.phone{width:180px;height:300px}.phone-icon{width:63px;height:63px}
+      .chip-one{right:2%;top:35px}.chip-two{left:2%;bottom:35px}
+      .section{padding:54px 0}.feature-grid{gap:12px}.feature{padding:18px;gap:12px}.feature-icon{width:42px;height:42px;flex-basis:42px}
+      .download-panel{flex-direction:column;align-items:center;text-align:center;padding:28px 24px;gap:20px}.panel-copy{text-align:center}.panel-actions{justify-content:center}.download-badge{order:-1;width:78px;height:78px;flex-basis:auto;font-size:30px}
+    }
+    @media(max-width:480px){
+      .wrap{width:calc(100% - 26px)}.brand{gap:8px;font-size:15px}.brand-mark{width:34px;height:34px;font-size:15px}
+      .btn-small{padding:9px 13px;font-size:11px}.hero-inner{padding-top:38px}.tagline{font-size:15px}
+      .bangla-line{font-size:14px;padding:7px 10px}.intro{font-size:14px}.app-preview{min-height:290px}
+      .phone{width:158px;height:270px;border-radius:27px}.phone-screen{border-radius:20px}.phone-icon{width:55px;height:55px;font-size:24px}
+      .float-chip{font-size:10px;padding:8px 10px}.section-head{margin-bottom:24px}.feature-grid{grid-template-columns:1fr}
+      .feature{padding:17px}.download-panel{padding:24px 19px;gap:16px}.download-badge{width:58px;height:58px;flex-basis:auto;border-radius:17px;font-size:23px}.panel-actions{flex-direction:column;align-items:stretch}.store-group{align-items:center}
+      .panel-copy h2{font-size:25px}.panel-copy p{font-size:12px}.panel-copy .btn{padding:12px 19px}
+    }
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <header class="topbar wrap">
+    <a class="brand" href="#top" aria-label="CampusMate BD home">
+      <span class="brand-mark"><img src="logo.png" alt="CampusMate BD logo"></span>
+      <span><em>CampusMate</em> BD</span>
+    </a>
+    <a class="btn btn-small" href="#download">Download</a>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="wrap hero-inner">
+        <div class="hero-copy">
+          <h1><span>CampusMate</span> BD</h1>
+          <p class="tagline">Campus Life, Made Beautiful.</p>
+          <p class="intro">All-in-one student app for campus notices, NU notices, library, notes, CGPA, budget, book market, document scanning and study planner.</p>
+          <div class="hero-actions">
+            <div class="store-group"><span class="store-label">Uptodown</span><a class="btn store-btn" data-store="uptodown" href="#">Download CMBD</a></div>
+            <div class="store-group"><span class="store-label">APKPure</span><a class="btn btn-outline store-btn" data-store="apkpure" href="#">Download CMBD</a></div>
+            <p class="store-note" id="storeNote">Store links will be added here once the listings are live.</p>
+          </div>
+        </div>
+        <div class="app-preview" aria-label="App preview illustration">
+          <div class="halo"></div>
+          <div class="float-chip chip-one"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="20 6 9 17 4 12"/></svg> Easy to use</div>
+          <div class="float-chip chip-two"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg> NU notice alerts</div>
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="notch"></div>
+              <div class="phone-content">
+                <div class="phone-icon"><img src="logo.png" alt="CampusMate BD logo"></div>
+                <div class="phone-title">CampusMate BD</div>
+                <div class="phone-sub">Campus Life, Made Beautiful.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section wrap" id="about">
+      <div class="section-head">
+        <div class="section-kicker">About the app</div>
+        <h2>Built for Campus Life</h2>
+        <p>A simple place for campus and NU notices with in-app PDFs, study tools, and everyday student needs in one app.</p>
+      </div>
+      <div class="feature-grid">
+        <article class="feature">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></div>
+          <div><h3>Campus &amp; NU Notices</h3><p>Notices and NU updates, with PDFs opening inside the app.</p></div>
+        </article>
+        <article class="feature">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+          <div><h3>Library</h3><p>Study resources and library PDFs in one place.</p></div>
+        </article>
+        <article class="feature">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+          <div><h3>Notes &amp; CGPA</h3><p>Personal notes and GPA / CGPA calculation for your courses.</p></div>
+        </article>
+        <article class="feature">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9v11a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9"/><path d="M9 21v-9h6v9"/></svg></div>
+          <div><h3>Book Market &amp; Budget</h3><p>Buy and sell books, and track your student budget.</p></div>
+        </article>
+      </div>
+
+      <div class="section" style="padding-bottom:0">
+        <div class="section-head" style="margin-bottom:20px">
+          <div class="section-kicker">App details</div>
+          <h2>Information at a Glance</h2>
+        </div>
+        <div class="feature-grid">
+          <article class="feature"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg></div><div><h3>Version</h3><p>1.1.19</p></div></article>
+          <article class="feature"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div><h3>App File Size</h3><p>41.32 MB</p></div></article>
+          <article class="feature"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="10" width="10" height="10" rx="2"/><path d="M9 10V7L7 5M15 10V7l2-2M4 12h2M18 12h2"/></svg></div><div><h3>Platform</h3><p>Android</p></div></article>
+          <article class="feature"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><h3>Developer</h3><p>CampusMate BD</p></div></article>
+        </div>
+      </div>
+
+      <section class="download-panel" id="download" style="margin-top:48px">
+        <div class="panel-copy">
+          <div class="section-kicker">Get started now</div>
+          <h2>Ready to Download?</h2>
+          <p>Download CampusMate BD from your preferred store.</p>
+          <div class="panel-actions">
+            <div class="store-group"><span class="store-label">Uptodown</span><a class="btn store-btn" data-store="uptodown" href="#">Download CMBD</a></div>
+            <div class="store-group"><span class="store-label">APKPure</span><a class="btn btn-outline store-btn" data-store="apkpure" href="#">Download CMBD</a></div>
+          </div>
+        </div>
+        <div class="download-badge" aria-hidden="true"><img src="logo.png" alt=""></div>
+      </section>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <div class="copyright">© <span id="year"></span> All rights reserved.</div>
+    </div>
+  </footer>
+
+  <script>
+    // Fill these two URLs with the REAL store page links after Uptodown and APKPure go live.
+    // Leave a URL empty until its listing is live — that button will show "Coming soon" instead of a broken link.
+    // Do NOT put a direct .apk link here.
+    const APP_CONFIG = {
+      uptodownUrl: "",
+      apkpureUrl: ""
+    };
+
+    const yearEl = document.getElementById("year");
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+    const storeNames = { uptodown: "Uptodown", apkpure: "APKPure" };
+    document.querySelectorAll(".store-btn").forEach((link) => {
+      const store = link.dataset.store;
+      const url = (store === "uptodown" ? APP_CONFIG.uptodownUrl : APP_CONFIG.apkpureUrl) || "";
+      if (url.trim() === "") {
+        link.href = "#download";
+        link.classList.add("disabled");
+        link.setAttribute("aria-disabled", "true");
+        link.textContent = "Download CMBD — Coming soon";
+        link.addEventListener("click", (e) => e.preventDefault());
+      } else {
+        link.href = url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+      }
+    });
+    if (APP_CONFIG.uptodownUrl.trim() !== "" && APP_CONFIG.apkpureUrl.trim() !== "") {
+      const note = document.getElementById("storeNote");
+      if (note) note.textContent = "";
+    }
+  <script>
+    // Keep the scroll position after a refresh (same tab).
+    // The browser alone can jump to the top on mobile while fonts/layout settle,
+    // so the position is saved in sessionStorage and restored after load.
+    try {
+      if ("scrollRestoration" in history) history.scrollRestoration = "auto";
+    } catch (e) {}
+    function saveScroll() {
+      try { sessionStorage.setItem("cmbd-scroll", String(window.scrollY)); } catch (e) {}
+    }
+    function restoreScroll() {
+      let y = null;
+      try { y = parseInt(sessionStorage.getItem("cmbd-scroll"), 10); } catch (e) {}
+      if (y && !isNaN(y) && y > 0) {
+        document.documentElement.style.scrollBehavior = "auto";
+        window.scrollTo(0, y);
+        requestAnimationFrame(function () {
+          document.documentElement.style.scrollBehavior = "";
+        });
+      }
+    }
+    let scrollTicking = false;
+    window.addEventListener("scroll", function () {
+      if (!scrollTicking) {
+        requestAnimationFrame(function () { saveScroll(); scrollTicking = false; });
+        scrollTicking = true;
+      }
+    }, { passive: true });
+    window.addEventListener("pagehide", saveScroll);
+    window.addEventListener("load", function () { setTimeout(restoreScroll, 50); });
+    restoreScroll();
+  </script>
+</body>
+</html>
