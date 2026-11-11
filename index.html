@@ -488,7 +488,7 @@
         // fall back to the page-stream download after 10 seconds.
         swWatchdog = setTimeout(function () {
           if (!swGotProgress && busy) startFetchDownload();
-        }, 10000);
+        }, 15000);
       }
       document.querySelectorAll("[data-direct-download]").forEach(function (btn) {
         btn.addEventListener("click", function () {
@@ -503,6 +503,26 @@
           showModal();
           if (navigator.serviceWorker && navigator.serviceWorker.controller) {
             startNativeDownload();
+          } else if (navigator.serviceWorker) {
+            // Worker is still activating (first seconds after page load):
+            // wait for it instead of instantly falling back to the old
+            // path, so the realtime download is used every time. The
+            // settled flag guarantees only ONE path ever starts.
+            var settled = false;
+            var readyTimer = setTimeout(function () {
+              if (!settled) { settled = true; startFetchDownload(); }
+            }, 5000);
+            navigator.serviceWorker.ready.then(function () {
+              clearTimeout(readyTimer);
+              setTimeout(function () {
+                if (settled) return;
+                settled = true;
+                if (navigator.serviceWorker.controller) startNativeDownload();
+                else startFetchDownload();
+              }, 300);
+            }).catch(function () {
+              if (!settled) { settled = true; startFetchDownload(); }
+            });
           } else {
             startFetchDownload();
           }
