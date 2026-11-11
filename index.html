@@ -327,12 +327,13 @@
       if (note) note.textContent = "";
     }
 
-    // Direct download, REALTIME % (v15): no <a href> in the page source,
+    // Direct download, REALTIME % (v16): no <a href> in the page source,
     // no URL shown. The real file address lives ONLY in the Vercel
-    // dashboard (APK_URL). On tap, TWO things start at once: (1) the
-    // real download — a plain browser download of /api/download, which
-    // redirects straight to the file host, so Chrome downloads directly
-    // from there with no time limit; (2) a % meter — the page streams
+    // dashboard (APK_URL). /api/download STREAMS the file through the
+    // server, so the browser only ever sees /api/download — no browser
+    // (not even Via Browser) can show or copy the real file address.
+    // On tap, TWO things start at once: (1) the real download — a plain
+    // browser download of /api/download; (2) a % meter — the page streams
     // the same file in parallel, counting bytes and throwing them away,
     // only to show the % in the popup. Chrome does not let a page read
     // its own download's progress, so the % is measured, not exact —
@@ -427,6 +428,14 @@
       // realtime. If the meter fails, the browser download keeps running
       // and the popup just points at the notification instead.
       function startMeter() {
+        var lastChunkAt = Date.now();
+        var stalled = false;
+        var stallTimer = setInterval(function () {
+          if (!stalled && Date.now() - lastChunkAt > 30000) {
+            stalled = true;
+            if (subText) subText.textContent = "Download running in your browser — see the % in the notification.";
+          }
+        }, 5000);
         fetch("/api/download?ts=" + Date.now()).then(function (res) {
           if (!res.ok || !res.body || !res.body.getReader) throw new Error("Meter unavailable");
           var total = parseInt(res.headers.get("content-length") || "0", 10) || 0;
@@ -436,14 +445,17 @@
             return reader.read().then(function (r) {
               if (r.done) return;
               received += r.value.length;
+              lastChunkAt = Date.now();
               setProgress(received, total);
               return pump();
             });
           }
           return pump();
         }).then(function () {
+          clearInterval(stallTimer);
           finishDownload();
         }).catch(function () {
+          clearInterval(stallTimer);
           if (subText) subText.textContent = "Download running in your browser — see the % in the notification.";
           setBtnState(false);
           busy = false;
@@ -461,9 +473,9 @@
           if (subText) subText.textContent = "Your download has started. Stay on this page.";
           showModal();
           // 1) The real download: a plain browser download, starting NOW
-          // in the tap. /api/download redirects straight to the file
-          // host, so Chrome downloads directly from there — no time
-          // limit, and it can retry/resume.
+          // in the tap. /api/download streams the file through the
+          // server (Range-capable, so it can resume) — the browser only
+          // ever sees /api/download, never the real file address.
           var a = document.createElement("a");
           a.href = "/api/download?ts=" + Date.now();
           a.setAttribute("download", "CampusMateBD.apk");
