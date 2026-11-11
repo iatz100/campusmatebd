@@ -10,14 +10,23 @@ self.addEventListener("activate", function (e) { e.waitUntil(self.clients.claim(
 self.addEventListener("fetch", function (event) {
   var url = new URL(event.request.url);
   if (url.pathname !== "/dl/CampusMateBD.apk") return;
+  // v14 FIX: without waitUntil, Chrome (especially on phones) may kill
+  // this worker mid-download once respondWith() settles — the stream
+  // then breaks and the browser reports "download failed" with the
+  // popup stuck at 0%. waitUntil keeps the worker alive until the
+  // whole file has streamed through.
+  var streamFinished;
+  var streamDone = new Promise(function (resolve) { streamFinished = resolve; });
+  event.waitUntil(streamDone);
   event.respondWith((async function () {
     var res;
     try {
       res = await fetch("/api/download?ts=" + Date.now());
     } catch (err) {
+      streamFinished();
       return new Response("Download is not ready yet.", { status: 502 });
     }
-    if (!res.ok || !res.body) return res;
+    if (!res.ok || !res.body) { streamFinished(); return res; }
     var total = parseInt(res.headers.get("content-length") || "0", 10) || 0;
     var client = null;
     try { client = await self.clients.get(event.clientId); } catch (e) {}
@@ -48,6 +57,8 @@ self.addEventListener("fetch", function (event) {
         } catch (err) {
           report(received, false, true);
           controller.error(err);
+        } finally {
+          streamFinished();
         }
       }
     });
