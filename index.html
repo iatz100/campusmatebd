@@ -327,16 +327,24 @@
       if (note) note.textContent = "";
     }
 
-    // Direct download with live % in the popup: no <a href> in the
-    // page source, no URL shown. The real file address lives ONLY in
-    // the Vercel dashboard (APK_URL). We fetch /api/download as a
-    // stream and count the bytes as they arrive, so the popup can
-    // show the real download % (Content-Length is forwarded by the
-    // server). At 100% we hand the finished file to the browser as
-    // CampusMateBD.apk — that is when the browser's own download
-    // starts. The Install step itself is Android's job, not the
-    // page's: after the download finishes, Android shows a
-    // "Download complete" notification — tapping it opens the installer.
+    // Direct download, REALTIME % (v12): no <a href> in the page source,
+    // no URL shown. The real file address lives ONLY in the Vercel
+    // dashboard (APK_URL). On tap, the browser download starts AT ONCE
+    // through /dl/CampusMateBD.apk, and the service worker (sw.js)
+    // streams /api/download into that download while counting bytes and
+    // reporting % to the popup — so % climbing MEANS the download is
+    // running, in realtime. If the worker is not active yet (very first
+    // visit), the page streams the file itself instead (fallback) and
+    // hands it to the browser at 100%. The Install step itself is
+    // Android's job, not the page's: after the download finishes,
+    // Android shows a "Download complete" notification — tapping it
+    // opens the installer.
+    // v12: register the download service worker as early as possible.
+    // It takes control of the page right after install (skipWaiting +
+    // clients.claim in sw.js), so the next tap uses the realtime path.
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(function () {});
+    }
     // NOTE: this must run on DOMContentLoaded — the modal HTML sits at the
     // end of the page, AFTER this script. Grabbing it at parse time returns
     // null and the popup never appears (that was the v1–v8 bug).
@@ -387,7 +395,7 @@
       }
       function hideModal() {
         // Only hides the popup — the download keeps running in the
-        // background and the browser download still starts at 100%.
+        // background (it already started in the browser on tap).
         if (modal) modal.classList.remove("open");
       }
       if (closeBtn) closeBtn.addEventListener("click", function () {
@@ -395,6 +403,93 @@
         openBrowserDownloads();
       });
       if (modal) modal.addEventListener("click", function (e) { if (e.target === modal) hideModal(); });
+      // Service-worker progress: the worker streams the real browser
+      // download and reports each chunk, so the popup % IS the download
+      // running in realtime.
+      var swGotProgress = false;
+      var swWatchdog = null;
+      function finishDownload() {
+        if (swWatchdog) { clearTimeout(swWatchdog); swWatchdog = null; }
+        if (pctText) pctText.textContent = "100%";
+        if (titleEl) titleEl.textContent = "Download complete!";
+        if (subText) subText.textContent = "Download finished. Tap the Download complete notification on your phone, then tap Install.";
+        setBtnState(false);
+        busy = false;
+      }
+      function failDownload() {
+        if (swWatchdog) { clearTimeout(swWatchdog); swWatchdog = null; }
+        if (titleEl) titleEl.textContent = "Download failed";
+        if (pctText) pctText.textContent = "—";
+        if (subText) subText.textContent = "Download failed, please try again.";
+        setBtnState(false);
+        busy = false;
+      }
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.addEventListener("message", function (e) {
+          var d = e.data || {};
+          if (d.type !== "cmbd-dl-progress" || !busy) return;
+          swGotProgress = true;
+          if (d.failed) { failDownload(); return; }
+          setProgress(d.received, d.total);
+          if (d.finished) finishDownload();
+        });
+      }
+      function startFetchDownload() {
+        // Fallback (worker not active yet, e.g. very first visit): stream
+        // through the page so the popup % still works, and hand the
+        // finished file to the browser at 100%.
+        aborter = new AbortController();
+        fetch("/api/download?ts=" + Date.now(), { signal: aborter.signal }).then(function (res) {
+          if (!res.ok) throw new Error("Download failed (" + res.status + ")");
+          var total = parseInt(res.headers.get("content-length") || "0", 10) || 0;
+          if (!res.body || !res.body.getReader) throw new Error("Streaming not supported");
+          var reader = res.body.getReader();
+          var chunks = [];
+          var received = 0;
+          function pump() {
+            return reader.read().then(function (r) {
+              if (r.done) return chunks;
+              chunks.push(r.value);
+              received += r.value.length;
+              setProgress(received, total);
+              return pump();
+            });
+          }
+          return pump().then(function () {
+            return { chunks: chunks, total: total, received: received };
+          });
+        }).then(function (done) {
+          setProgress(done.received, done.total > 0 ? done.total : done.received);
+          var blob = new Blob(done.chunks, { type: "application/vnd.android.package-archive" });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement("a");
+          a.href = url;
+          a.setAttribute("download", "CampusMateBD.apk");
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); URL.revokeObjectURL(url); }, 5000);
+          finishDownload();
+        }).catch(function (err) {
+          if (err && err.name === "AbortError") return;
+          failDownload();
+        });
+      }
+      function startNativeDownload() {
+        // Realtime path: the browser download starts RIGHT NOW, in the
+        // tap, and the worker reports % as the bytes arrive.
+        swGotProgress = false;
+        var a = document.createElement("a");
+        a.href = "/dl/CampusMateBD.apk?ts=" + Date.now();
+        a.setAttribute("download", "CampusMateBD.apk");
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 5000);
+        // If the worker never reports (e.g. sw.js was not uploaded),
+        // fall back to the page-stream download after 10 seconds.
+        swWatchdog = setTimeout(function () {
+          if (!swGotProgress && busy) startFetchDownload();
+        }, 10000);
+      }
       document.querySelectorAll("[data-direct-download]").forEach(function (btn) {
         btn.addEventListener("click", function () {
           if (busy) return;
@@ -406,49 +501,11 @@
           if (pctText) pctText.textContent = "0%";
           if (subText) subText.textContent = "Your download has started. Stay on this page.";
           showModal();
-          aborter = new AbortController();
-          fetch("/api/download?ts=" + Date.now(), { signal: aborter.signal }).then(function (res) {
-            if (!res.ok) throw new Error("Download failed (" + res.status + ")");
-            var total = parseInt(res.headers.get("content-length") || "0", 10) || 0;
-            if (!res.body || !res.body.getReader) throw new Error("Streaming not supported");
-            var reader = res.body.getReader();
-            var chunks = [];
-            var received = 0;
-            function pump() {
-              return reader.read().then(function (r) {
-                if (r.done) return chunks;
-                chunks.push(r.value);
-                received += r.value.length;
-                setProgress(received, total);
-                return pump();
-              });
-            }
-            return pump().then(function () {
-              return { chunks: chunks, total: total, received: received };
-            });
-          }).then(function (done) {
-            setProgress(done.received, done.total > 0 ? done.total : done.received);
-            if (pctText) pctText.textContent = "100%";
-            if (titleEl) titleEl.textContent = "Download complete!";
-            if (subText) subText.textContent = "Download finished. Tap the Download complete notification on your phone, then tap Install.";
-            var blob = new Blob(done.chunks, { type: "application/vnd.android.package-archive" });
-            var url = URL.createObjectURL(blob);
-            var a = document.createElement("a");
-            a.href = url;
-            a.setAttribute("download", "CampusMateBD.apk");
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); URL.revokeObjectURL(url); }, 5000);
-            setBtnState(false);
-            busy = false;
-          }).catch(function (err) {
-            if (err && err.name === "AbortError") return;
-            if (titleEl) titleEl.textContent = "Download failed";
-            if (pctText) pctText.textContent = "—";
-            if (subText) subText.textContent = "Download failed, please try again.";
-            setBtnState(false);
-            busy = false;
-          });
+          if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+            startNativeDownload();
+          } else {
+            startFetchDownload();
+          }
         });
       });
     });
