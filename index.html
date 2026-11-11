@@ -180,16 +180,6 @@
     .direct-btn.downloading .btn-spinner{display:inline-block}
     .direct-btn.downloading{opacity:.9;cursor:wait}
     @keyframes btnspin{to{transform:rotate(360deg)}}
-    .dl-modal-backdrop{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;background:rgba(10,30,20,.55);padding:20px}
-    .dl-modal-backdrop.open{display:flex}
-    .dl-modal{width:min(420px,100%);background:#fff;border-radius:18px;padding:24px;box-shadow:0 20px 50px rgba(0,0,0,.25);text-align:left}
-    .dl-modal h3{margin:0 0 8px;color:#102e60;font-size:20px}
-    .dl-modal p{margin:0 0 10px;color:#5b6e89;font-size:14px}
-    .dl-modal ol{margin:0 0 14px;padding-left:20px;color:#173966;font-size:14px}
-    .dl-modal .btn{width:100%}
-    .dl-progress{height:14px;background:#e3f2e9;border-radius:999px;overflow:hidden;margin:14px 0 6px}
-    .dl-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#16a34a,#22c55e);border-radius:999px;transition:width .2s}
-    .dl-progress-text{margin:0 0 10px !important;color:#102e60 !important;font-size:22px !important;font-weight:800;text-align:center}
   </style>
 </head>
 <body>
@@ -327,24 +317,18 @@
       if (note) note.textContent = "";
     }
 
-    // Direct download, REALTIME % (v20): no <a href> in the page source,
+    // Direct download, NO popup (v21): no <a href> in the page source,
     // no URL shown. The real file address lives ONLY in the Vercel
     // dashboard (APK_URL). /api/download STREAMS the file through the
     // server, so the browser only ever sees /api/download — no browser
     // (not even Via Browser) can show or copy the real file address.
-    // On tap, TWO things start at once: (1) the real download — a plain
-    // browser download of /api/download, owned by the browser's download
-    // manager, so it keeps going even if you leave the browser or close
-    // the tab; (2) a % meter — the page streams the same file in
-    // parallel, counting bytes and throwing them away, only to show the
-    // % in the popup. Chrome does not let a page read its own download's
-    // progress, so the % is measured, not exact — but it runs at the same
-    // time as the real download, in realtime. Cancel closes the popup
-    // (the browser download keeps running in the background); a failed
-    // meter closes the popup by itself. The Install step itself is
-    // Android's job, not the page's: after the download finishes,
-    // Android shows a "Download complete" notification — tapping it
-    // opens the installer.
+    // On tap, a plain browser download of /api/download starts, owned
+    // by the browser's download manager: it keeps going even if you
+    // leave the browser or close the tab, and the browser itself shows
+    // the % (notification on mobile, download bar on desktop). The
+    // Install step itself is Android's job, not the page's: after the
+    // download finishes, Android shows a "Download complete"
+    // notification — tapping it opens the installer.
     // v15: the service worker download (v12–v14) is retired — it kept
     // dying on phones. Unregister it so it stops intercepting anything.
     if ("serviceWorker" in navigator) {
@@ -352,202 +336,22 @@
         regs.forEach(function (r) { r.unregister().catch(function () {}); });
       }).catch(function () {});
     }
-    // NOTE: this must run on DOMContentLoaded — the modal HTML sits at the
-    // end of the page, AFTER this script. Grabbing it at parse time returns
-    // null and the popup never appears (that was the v1–v8 bug).
     document.addEventListener("DOMContentLoaded", function () {
-      var modal = document.getElementById("dlModal");
-      var closeBtn = document.getElementById("dlModalClose");
-      var fill = document.getElementById("dlProgressFill");
-      var pctText = document.getElementById("dlProgressText");
-      var subText = document.getElementById("dlProgressSub");
-      var titleEl = document.getElementById("dlModalTitle");
-      var busy = false;
-      var aborter = null;
-      var activeBtn = null;
-      // Spinner only in the button — NO % here. % shows only in the popup.
-      function setBtnState(downloading) {
-        if (!activeBtn) return;
-        if (downloading) {
-          activeBtn.classList.add("downloading");
-        } else {
-          activeBtn.classList.remove("downloading");
-          activeBtn = null;
-        }
-      }
-      function mb(n) { return (n / 1048576).toFixed(1) + " MB"; }
-      function setProgress(received, total) {
-        var pct = total > 0 ? Math.floor(received / total * 100) : 0;
-        if (fill) fill.style.width = (total > 0 ? pct : 0) + "%";
-        setBtnState(true);
-        if (pctText) pctText.textContent = total > 0 ? pct + "%" : mb(received);
-        if (subText) subText.textContent = total > 0
-          ? mb(received) + " / " + mb(total) + " downloaded"
-          : mb(received) + " downloaded…";
-      }
-      function showModal() { if (modal) modal.classList.add("open"); }
-      function openBrowserDownloads() {
-        // Android Chrome: intent:// opens chrome://downloads in Chrome.
-        // Desktop Chrome: fall back to chrome://downloads in a new tab.
-        try {
-          var a = document.createElement("a");
-          a.href = "intent://downloads/#Intent;scheme=chrome;package=com.android.chrome;end";
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 1000);
-        } catch (e) {}
-        setTimeout(function () {
-          try { window.open("chrome://downloads", "_blank"); } catch (e2) {}
-        }, 400);
-      }
-      var cancelled = false;
-      var failTimer = null;
-      var stallTimer = null;
-      function hideModal() {
-        if (modal) modal.classList.remove("open");
-      }
-      // The popup button is Cancel while downloading (closes the popup
-      // and stops the % meter — the browser's own download keeps running
-      // in the background) and Got it once finished (closes the popup
-      // and opens the browser's Downloads page).
-      function setPopupButton(mode) {
-        if (!closeBtn) return;
-        if (mode === "cancel") {
-          closeBtn.textContent = "Cancel";
-          closeBtn.classList.add("btn-outline");
-        } else {
-          closeBtn.textContent = "Got it";
-          closeBtn.classList.remove("btn-outline");
-        }
-      }
-      if (closeBtn) closeBtn.addEventListener("click", function () {
-        if (busy) { cancelDownload(); }
-        else { hideModal(); openBrowserDownloads(); }
-      });
-      // Backdrop click while downloading does NOTHING — the popup stays
-      // open and the download keeps running. After finishing, backdrop
-      // click just closes the popup.
-      if (modal) modal.addEventListener("click", function (e) {
-        if (e.target === modal && !busy) hideModal();
-      });
-      function finishDownload() {
-        if (pctText) pctText.textContent = "100%";
-        if (titleEl) titleEl.textContent = "Download complete!";
-        if (subText) subText.textContent = "Download finished. Tap the Download complete notification on your phone, then tap Install.";
-        setPopupButton("gotit");
-        setBtnState(false);
-        busy = false;
-      }
-      function failDownload() {
-        if (titleEl) titleEl.textContent = "Download failed";
-        if (pctText) pctText.textContent = "—";
-        if (subText) subText.textContent = "Download failed, please try again.";
-        setBtnState(false);
-        busy = false;
-        // The popup cannot track the download any more — so it closes
-        // by itself. The browser's own download may still be running
-        // in the background (see the notification).
-        clearTimeout(failTimer);
-        failTimer = setTimeout(function () { hideModal(); }, 2000);
-      }
-      function cancelDownload() {
-        // Cancel closes the popup and stops the % meter. The browser's
-        // own download cannot be stopped from the page — it keeps
-        // running in the background (notification / Downloads page).
-        cancelled = true;
-        clearInterval(stallTimer);
-        clearTimeout(failTimer);
-        if (aborter) { try { aborter.abort(); } catch (e) {} aborter = null; }
-        hideModal();
-        setBtnState(false);
-        busy = false;
-      }
-      // Popup % meter: Chrome does not let a page read its own download's
-      // progress, so the % is measured from a parallel stream of the same
-      // file — bytes are counted and thrown away, nothing is kept in
-      // memory. It runs at the same time as the real browser download, so
-      // the % climbing means the download is running, in realtime.
-      function startMeter() {
-        var lastChunkAt = Date.now();
-        var done = false;
-        aborter = new AbortController();
-        clearInterval(stallTimer);
-        stallTimer = setInterval(function () {
-          if (!done && Date.now() - lastChunkAt > 30000) {
-            done = true;
-            try { aborter.abort(); } catch (e) {}
-            failDownload();
-          }
-        }, 5000);
-        fetch("/api/download?ts=" + Date.now(), { signal: aborter.signal }).then(function (res) {
-          if (!res.ok || !res.body || !res.body.getReader) throw new Error("Meter unavailable");
-          var total = parseInt(res.headers.get("content-length") || "0", 10) || 0;
-          var reader = res.body.getReader();
-          var received = 0;
-          function pump() {
-            return reader.read().then(function (r) {
-              if (r.done) return;
-              received += r.value.length;
-              lastChunkAt = Date.now();
-              setProgress(received, total);
-              return pump();
-            });
-          }
-          return pump();
-        }).then(function () {
-          if (done) return;
-          done = true;
-          clearInterval(stallTimer);
-          finishDownload();
-        }).catch(function () {
-          if (done) return;
-          done = true;
-          clearInterval(stallTimer);
-          if (cancelled) return;
-          failDownload();
-        });
-      }
+      var lastTap = 0;
       document.querySelectorAll("[data-direct-download]").forEach(function (btn) {
         btn.addEventListener("click", function () {
-          if (busy) return;
-          busy = true;
-          cancelled = false;
-          clearTimeout(failTimer);
-          activeBtn = btn;
-          setBtnState(true);
-          setPopupButton("cancel");
-          if (titleEl) titleEl.textContent = "Downloading…";
-          setProgress(0, 0);
-          if (pctText) pctText.textContent = "0%";
-          if (subText) subText.textContent = "Your download has started. Stay on this page.";
-          if (fill && fill.parentNode) fill.parentNode.style.display = "";
-          showModal();
-          // 1) The real download: a plain browser download, starting NOW
-          // in the tap. /api/download streams the file through the
-          // server (Range-capable, so it can resume) — the browser only
-          // ever sees /api/download, never the real file address. Once
-          // started, it belongs to the browser's download manager: it
-          // keeps going even if you leave the browser or close the tab.
+          var now = Date.now();
+          if (now - lastTap < 3000) return;
+          lastTap = now;
           var a = document.createElement("a");
           a.href = "/api/download?ts=" + Date.now();
           a.setAttribute("download", "CampusMateBD.apk");
           document.body.appendChild(a);
           a.click();
           setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 5000);
-          // 2) The popup % meter — touch devices only. On desktop the
-          // browser shows its own download % in the download bar, and a
-          // Save dialog (if the user enabled "Ask where to save") would
-          // hold the real download back while the meter climbed — a
-          // misleading %. So on desktop: no meter, just a spinner and
-          // a pointer to the browser's own download %.
-          if (("ontouchstart" in window) || (typeof navigator.maxTouchPoints !== "undefined" && navigator.maxTouchPoints > 0)) {
-            startMeter();
-          } else {
-            if (fill && fill.parentNode) fill.parentNode.style.display = "none";
-            if (pctText) pctText.textContent = "";
-            if (subText) subText.textContent = "Download started — see the % in your browser's download bar.";
-            setTimeout(function () { setBtnState(false); busy = false; setPopupButton("gotit"); }, 3000);
-          }
+          // Brief spinner so the tap feels answered, then back to normal.
+          btn.classList.add("downloading");
+          setTimeout(function () { btn.classList.remove("downloading"); }, 3000);
         });
       });
     });
@@ -585,17 +389,5 @@
     restoreScroll();
   </script>
 
-  <div class="dl-modal-backdrop" id="dlModal" role="dialog" aria-modal="true" aria-labelledby="dlModalTitle">
-    <div class="dl-modal">
-      <h3 id="dlModalTitle">Downloading…</h3>
-      <div class="dl-progress"><div class="dl-progress-fill" id="dlProgressFill"></div></div>
-      <p class="dl-progress-text" id="dlProgressText">0%</p>
-      <p id="dlProgressSub">Your download has started. Stay on this page.</p>
-      <ol>
-        <li>When the download finishes, tap the <b>Download complete</b> notification on your phone.</li>
-      </ol>
-      <button type="button" class="btn" id="dlModalClose">Got it</button>
-    </div>
-  </div>
 </body>
 </html>
