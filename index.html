@@ -210,7 +210,7 @@
           <p class="intro">All-in-one student app for campus notices, NU notices, library, notes, CGPA, budget, book market, document scanning and study planner.</p>
           <div class="hero-actions">
             <div class="store-group"><span class="store-label">Direct Download</span><button type="button" class="btn direct-btn" data-direct-download><span class="btn-spinner"></span><span class="btn-label">Download CMBD</span></button></div>
-            <div class="store-group"><span class="store-label">APKPure</span><a class="btn btn-outline store-btn" data-store="apkpure" href="https://apkpure.com/campusmate-bd/com.campusmatebd.cmbd">Download CMBD</a></div>
+            <div class="store-group"><span class="store-label">APKPure</span><a class="btn btn-outline store-btn" data-store="apkpure" href="#">Download CMBD</a></div>
             <p class="store-note" id="storeNote">Store links will be added here once the listings are live.</p>
           </div>
         </div>
@@ -277,7 +277,7 @@
           <p>Download CampusMate BD directly — no store needed.</p>
           <div class="panel-actions">
             <div class="store-group"><span class="store-label">Direct Download</span><button type="button" class="btn direct-btn" data-direct-download><span class="btn-spinner"></span><span class="btn-label">Download CMBD</span></button></div>
-            <div class="store-group"><span class="store-label">APKPure</span><a class="btn btn-outline store-btn" data-store="apkpure" href="https://apkpure.com/campusmate-bd/com.campusmatebd.cmbd">Download CMBD</a></div>
+            <div class="store-group"><span class="store-label">APKPure</span><a class="btn btn-outline store-btn" data-store="apkpure" href="#">Download CMBD</a></div>
           </div>
         </div>
         <div class="download-badge" aria-hidden="true"><img src="logo.png" alt=""></div>
@@ -301,7 +301,7 @@
     // address here, in a JSON file, or in vercel.json — any file in
     // this public repo can be opened by anyone.
     const APP_CONFIG = {
-      apkpureUrl: ""
+      apkpureUrl: "https://apkpure.com/campusmate-bd/com.campusmatebd.cmbd"
     };
 
     const yearEl = document.getElementById("year");
@@ -350,24 +350,21 @@
       var busy = false;
       var aborter = null;
       var activeBtn = null;
-      var activeLabel = null;
-      function setBtnState(downloading, pct) {
+      // Spinner only in the button — NO % here. % shows only in the popup.
+      function setBtnState(downloading) {
         if (!activeBtn) return;
         if (downloading) {
           activeBtn.classList.add("downloading");
-          if (activeLabel) activeLabel.textContent = pct >= 0 ? "Downloading… " + pct + "%" : "Downloading…";
         } else {
           activeBtn.classList.remove("downloading");
-          if (activeLabel) activeLabel.textContent = "Download CMBD";
           activeBtn = null;
-          activeLabel = null;
         }
       }
       function mb(n) { return (n / 1048576).toFixed(1) + " MB"; }
       function setProgress(received, total) {
         var pct = total > 0 ? Math.floor(received / total * 100) : 0;
         if (fill) fill.style.width = (total > 0 ? pct : 0) + "%";
-        setBtnState(true, total > 0 ? pct : -1);
+        setBtnState(true);
         if (pctText) pctText.textContent = total > 0 ? pct + "%" : mb(received);
         if (subText) subText.textContent = total > 0
           ? mb(received) + " / " + mb(total) + " downloaded"
@@ -403,8 +400,7 @@
           if (busy) return;
           busy = true;
           activeBtn = btn;
-          activeLabel = btn.querySelector(".btn-label");
-          setBtnState(true, 0);
+          setBtnState(true);
           if (titleEl) titleEl.textContent = "Downloading…";
           setProgress(0, 0);
           if (pctText) pctText.textContent = "0%";
