@@ -424,12 +424,32 @@
         setBtnState(false);
         busy = false;
       }
+      // Last-resort delivery: a plain browser download, no worker, no
+      // streaming through the page. Chrome's download manager handles
+      // it (and shows its own % in the notification). Used only when
+      // the worker download fails or never reports progress.
+      var anchorFallbackUsed = false;
+      function startAnchorDownload() {
+        if (anchorFallbackUsed) return;
+        anchorFallbackUsed = true;
+        if (swWatchdog) { clearTimeout(swWatchdog); swWatchdog = null; }
+        if (titleEl) titleEl.textContent = "Downloading…";
+        if (subText) subText.textContent = "Download running in your browser — see the % in the notification.";
+        var a = document.createElement("a");
+        a.href = "/api/download?ts=" + Date.now();
+        a.setAttribute("download", "CampusMateBD.apk");
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 5000);
+        setBtnState(false);
+        busy = false;
+      }
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.addEventListener("message", function (e) {
           var d = e.data || {};
           if (d.type !== "cmbd-dl-progress" || !busy) return;
           swGotProgress = true;
-          if (d.failed) { failDownload(); return; }
+          if (d.failed) { startAnchorDownload(); return; }
           setProgress(d.received, d.total);
           if (d.finished) finishDownload();
         });
@@ -484,10 +504,10 @@
         document.body.appendChild(a);
         a.click();
         setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 5000);
-        // If the worker never reports (e.g. sw.js was not uploaded),
-        // fall back to the page-stream download after 10 seconds.
+        // If the worker never reports (e.g. sw.js was not uploaded, or
+        // the worker died), fall back to a plain browser download.
         swWatchdog = setTimeout(function () {
-          if (!swGotProgress && busy) startFetchDownload();
+          if (!swGotProgress && busy) startAnchorDownload();
         }, 15000);
       }
       document.querySelectorAll("[data-direct-download]").forEach(function (btn) {
