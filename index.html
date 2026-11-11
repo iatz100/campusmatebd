@@ -183,6 +183,9 @@
     .dl-modal p{margin:0 0 10px;color:#5b6e89;font-size:14px}
     .dl-modal ol{margin:0 0 14px;padding-left:20px;color:#173966;font-size:14px}
     .dl-modal .btn{width:100%}
+    .dl-progress{height:14px;background:#e3f2e9;border-radius:999px;overflow:hidden;margin:14px 0 6px}
+    .dl-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#16a34a,#22c55e);border-radius:999px;transition:width .2s}
+    .dl-progress-text{margin:0 0 10px !important;color:#102e60 !important;font-size:22px !important;font-weight:800;text-align:center}
   </style>
 </head>
 <body>
@@ -320,31 +323,113 @@
       if (note) note.textContent = "";
     }
 
-    // Direct download: no <a href>, no URL in the page.
-    // A hidden iframe calls /api/download, so the browser shows its
-    // normal download popup and the user STAYS on this same page.
-    // The Install step itself is Android's job, not the page's:
-    // after the download finishes, Android shows a "Download complete"
-    // notification — tapping it opens the installer.
+    // Direct download with live % in the popup: no <a href> in the
+    // page source, no URL shown. The real file address lives ONLY in
+    // the Vercel dashboard (APK_URL). We fetch /api/download as a
+    // stream and count the bytes as they arrive, so the popup can
+    // show the real download % (Content-Length is forwarded by the
+    // server). At 100% we hand the finished file to the browser as
+    // CampusMateBD.apk — that is when the browser's own download
+    // starts. The Install step itself is Android's job, not the
+    // page's: after the download finishes, Android shows a
+    // "Download complete" notification — tapping it opens the installer.
     (function () {
       var modal = document.getElementById("dlModal");
       var closeBtn = document.getElementById("dlModalClose");
+      var fill = document.getElementById("dlProgressFill");
+      var pctText = document.getElementById("dlProgressText");
+      var subText = document.getElementById("dlProgressSub");
+      var titleEl = document.getElementById("dlModalTitle");
+      var busy = false;
+      var aborter = null;
+      function mb(n) { return (n / 1048576).toFixed(1) + " MB"; }
+      function setProgress(received, total) {
+        var pct = total > 0 ? Math.floor(received / total * 100) : 0;
+        if (fill) fill.style.width = (total > 0 ? pct : 0) + "%";
+        if (pctText) pctText.textContent = total > 0 ? pct + "%" : mb(received);
+        if (subText) subText.textContent = total > 0
+          ? mb(received) + " / " + mb(total) + " downloaded"
+          : mb(received) + " downloaded…";
+      }
       function showModal() { if (modal) modal.classList.add("open"); }
-      function hideModal() { if (modal) modal.classList.remove("open"); }
-      if (closeBtn) closeBtn.addEventListener("click", hideModal);
+      function openBrowserDownloads() {
+        // Android Chrome: intent:// opens chrome://downloads in Chrome.
+        // Desktop Chrome: fall back to chrome://downloads in a new tab.
+        try {
+          var a = document.createElement("a");
+          a.href = "intent://downloads/#Intent;scheme=chrome;package=com.android.chrome;end";
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 1000);
+        } catch (e) {}
+        setTimeout(function () {
+          try { window.open("chrome://downloads", "_blank"); } catch (e2) {}
+        }, 400);
+      }
+      function hideModal() {
+        if (modal) modal.classList.remove("open");
+        if (aborter) { try { aborter.abort(); } catch (e) {} aborter = null; }
+        busy = false;
+      }
+      if (closeBtn) closeBtn.addEventListener("click", function () {
+        hideModal();
+        openBrowserDownloads();
+      });
       if (modal) modal.addEventListener("click", function (e) { if (e.target === modal) hideModal(); });
       document.querySelectorAll("[data-direct-download]").forEach(function (btn) {
         btn.addEventListener("click", function () {
+          if (busy) return;
+          busy = true;
+          if (titleEl) titleEl.textContent = "Downloading…";
+          setProgress(0, 0);
+          if (pctText) pctText.textContent = "0%";
+          if (subText) subText.textContent = "Your download has started. Stay on this page.";
           showModal();
-          var f = document.createElement("iframe");
-          f.style.display = "none";
-          f.setAttribute("aria-hidden", "true");
-          f.src = "/api/download?ts=" + Date.now();
-          document.body.appendChild(f);
-          setTimeout(function () { if (f.parentNode) f.parentNode.removeChild(f); }, 60000);
+          aborter = new AbortController();
+          fetch("/api/download?ts=" + Date.now(), { signal: aborter.signal }).then(function (res) {
+            if (!res.ok) throw new Error("Download failed (" + res.status + ")");
+            var total = parseInt(res.headers.get("content-length") || "0", 10) || 0;
+            if (!res.body || !res.body.getReader) throw new Error("Streaming not supported");
+            var reader = res.body.getReader();
+            var chunks = [];
+            var received = 0;
+            function pump() {
+              return reader.read().then(function (r) {
+                if (r.done) return chunks;
+                chunks.push(r.value);
+                received += r.value.length;
+                setProgress(received, total);
+                return pump();
+              });
+            }
+            return pump().then(function () {
+              return { chunks: chunks, total: total, received: received };
+            });
+          }).then(function (done) {
+            setProgress(done.received, done.total > 0 ? done.total : done.received);
+            if (pctText) pctText.textContent = "100%";
+            if (titleEl) titleEl.textContent = "Download complete!";
+            if (subText) subText.textContent = "Download finished. Tap the Download complete notification on your phone, then tap Install.";
+            var blob = new Blob(done.chunks, { type: "application/vnd.android.package-archive" });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement("a");
+            a.href = url;
+            a.setAttribute("download", "CampusMateBD.apk");
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); URL.revokeObjectURL(url); }, 5000);
+            busy = false;
+          }).catch(function (err) {
+            if (err && err.name === "AbortError") return;
+            if (titleEl) titleEl.textContent = "Download failed";
+            if (pctText) pctText.textContent = "—";
+            if (subText) subText.textContent = "Download failed, please try again.";
+            busy = false;
+          });
         });
       });
     })();
+  </script>
   <script>
     // Keep the scroll position after a refresh (same tab).
     // The browser alone can jump to the top on mobile while fonts/layout settle,
@@ -381,12 +466,12 @@
   <div class="dl-modal-backdrop" id="dlModal" role="dialog" aria-modal="true" aria-labelledby="dlModalTitle">
     <div class="dl-modal">
       <h3 id="dlModalTitle">Downloading…</h3>
-      <p>Your download has started. Stay on this page.</p>
+      <div class="dl-progress"><div class="dl-progress-fill" id="dlProgressFill"></div></div>
+      <p class="dl-progress-text" id="dlProgressText">0%</p>
+      <p id="dlProgressSub">Your download has started. Stay on this page.</p>
       <ol>
         <li>When the download finishes, tap the <b>Download complete</b> notification on your phone.</li>
-        <li>Then tap <b>Install</b>. If asked, allow <b>Install unknown apps</b> for Chrome.</li>
       </ol>
-      <p style="font-size:13px">ডাউনলোড শেষ হলে ফোনের নোটিফিকেশনে চাপুন, তারপর Install চাপুন।</p>
       <button type="button" class="btn" id="dlModalClose">Got it</button>
     </div>
   </div>
